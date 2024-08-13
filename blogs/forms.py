@@ -6,6 +6,7 @@ class PostsForm(forms.ModelForm):
         model = Post
         fields = ['title', 'content']
 
+
 class CommentForm(forms.ModelForm):
     post_id = forms.IntegerField()
     content = forms.CharField(widget=forms.Textarea)

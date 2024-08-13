@@ -119,7 +119,7 @@ class CommentPost(View):
 
         comments = Comment.objects.filter(post = post).values()
         if not comments.exists():
-            return JsonResponse({"message": "no blog is avalilable."}, status = 404)
+            return JsonResponse({"message": "no comment is avalilable."}, status = 404)
         
         return JsonResponse(list(comments), safe=False)
     
@@ -156,7 +156,7 @@ class IndividualComment(View):
        
         try:
              comment = Comment.objects.get(id=comment_id)
-        except Post.DoesNotExist:
+        except Comment.DoesNotExist:
             return JsonResponse({"message": f"no comment is avalilable with id: {comment_id}."}, status = 404)
             
         data = {
