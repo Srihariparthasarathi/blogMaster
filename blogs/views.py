@@ -136,7 +136,6 @@ class CommentPost(View):
         form = CommentForm(data=data)
         if form.is_valid():
             comment = form.save()
-            print(comment.post.id)
             data = {
                 'id': comment.id,
                 'post_id': comment.post.id,
