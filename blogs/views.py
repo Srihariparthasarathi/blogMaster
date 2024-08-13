@@ -13,12 +13,12 @@ class Posts(View):
 
     def get(self, request, *args, **kwargs):
 
-        posts = Post.objects.all()
+        posts = Post.objects.all().values("id","title","content")
 
         if not posts.exists():
             return JsonResponse({"message": "no blog is avalilable."}, status = 404)
         
-        return JsonResponse(list(posts.values()), safe=False)
+        return JsonResponse(list(posts), safe=False)
     
     def post(self, request, *args, **kwargs):
 
@@ -41,3 +41,69 @@ class Posts(View):
         
         else:
             return JsonResponse(form.errors, status=400)
+        
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class IndividualPost(View):
+    def get(self, request, *args, **kwargs):
+        post_id = kwargs['id']
+       
+        try:
+             post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"message": f"no blog is avalilable with id: {post_id}."}, status = 404)
+            
+        post = {
+            "id": post.id,
+            "title": post.title,
+            "contect": post.content
+        }
+
+        return JsonResponse(post, safe=False)
+    
+    def put(self, request, *args, **kwargs):
+
+        post_id = kwargs['id']
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status = 404)
+
+
+        try:
+             data = json.loads(request.body)
+        except:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        
+
+        post.content = data.get("content", post.content)
+        post.title = data.get("title", post.title)
+        post.save()
+
+        response_data = {
+                'id': post.id,
+                'title': post.title,
+                'content': post.content,
+                'created_at': post.created_at,
+                'updated_at': post.updated_at
+            }
+        
+        return JsonResponse(response_data, status=201)  
+        
+
+    def delete(self, request, *args, **kwargs):
+
+        post_id = kwargs['id']
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status=404)
+        
+
+        post.delete()
+        return JsonResponse({'status': 'success', 'message': 'Item deleted successfully.'})
+        
+
+ 
+       
