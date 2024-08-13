@@ -68,7 +68,7 @@ class IndividualPost(View):
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
-            return JsonResponse({'error': 'Item not found'}, status = 404)
+            return JsonResponse({'error': 'post not found'}, status = 404)
 
 
         try:
@@ -105,5 +105,5 @@ class IndividualPost(View):
         return JsonResponse({'status': 'success', 'message': 'Item deleted successfully.'})
         
 
- 
+
        

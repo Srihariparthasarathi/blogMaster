@@ -10,12 +10,3 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-    
-class Commant(models.Model):
-
-    post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
-    content =  models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.title

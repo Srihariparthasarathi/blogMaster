@@ -6,8 +6,3 @@ class PostsForm(forms.ModelForm):
         model = Post
         fields = ['title', 'content']
 
-
-class CommantsForm(forms.ModelForm):
-    class Meta:
-        model = Commant
-        fields = ['post_id', 'content']
