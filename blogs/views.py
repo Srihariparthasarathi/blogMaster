@@ -105,5 +105,105 @@ class IndividualPost(View):
         return JsonResponse({'status': 'success', 'message': 'Item deleted successfully.'})
         
 
- 
+@method_decorator(csrf_exempt, name='dispatch')
+class CommentPost(View):
+
+    def get(self, request, *args, **kwargs):
+        post_id = request.GET.get('post_id')
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Item not found'}, status=404)
+        
+
+        comments = Comment.objects.filter(post = post).values()
+        if not comments.exists():
+            return JsonResponse({"message": "no blog is avalilable."}, status = 404)
+        
+        return JsonResponse(list(comments), safe=False)
+    
+
+
+    def post(self, request, *args, **kwargs):
+        
+        try:
+             data = json.loads(request.body)
+        except:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+
+
+        form = CommentForm(data=data)
+        if form.is_valid():
+            comment = form.save()
+            print(comment.post.id)
+            data = {
+                'id': comment.id,
+                'post_id': comment.post.id,
+                'comment': comment.content,
+                'created_at': comment.created_at,
+            }
+            return JsonResponse({"data": data}, status=201)
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)        
+
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class IndividualComment(View):
+
+    def get(self, request, *args, **kwargs):
+        comment_id = kwargs['id']
        
+        try:
+             comment = Comment.objects.get(id=comment_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"message": f"no comment is avalilable with id: {comment_id}."}, status = 404)
+            
+        data = {
+            "id": comment.id,
+            "post_id": comment.post.id,
+            "comment": comment.content
+        }
+
+        return JsonResponse(data, safe=False)
+    
+
+    def put(self, request, *args, **kwargs):
+
+        comment_id = kwargs['id']
+        try:
+            comment = Comment.objects.get(id=comment_id)
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'comment not found'}, status = 404)
+
+
+        try:
+             data = json.loads(request.body)
+        except:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        
+
+        comment.content = data.get("content", comment.content)
+        comment.save()
+
+        data = {
+            "id": comment.id,
+            "post_id": comment.post.id,
+            "comment": comment.content
+        }
+        
+        return JsonResponse({"data": data, "message": "comment updated successfully"}, status=201)
+
+    def delete(self, request, *args, **kwargs):
+
+        comment_id = kwargs['id']
+        try:
+            comment = Comment.objects.get(id=comment_id)
+            print(comment)
+        except comment.DoesNotExist:
+            return JsonResponse({'error': 'comment not found'}, status=404)
+        
+
+        comment.delete()
+        return JsonResponse({'status': 'success', 'message': 'comment deleted successfully.'})
