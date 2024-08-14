@@ -1,5 +1,7 @@
 from django import forms
 from .models import *
+from django.contrib.auth.models import User  
+from django.contrib.auth.forms import UserCreationForm  
 
 class PostsForm(forms.ModelForm):
     class Meta:
@@ -40,3 +42,26 @@ class CommentForm(forms.ModelForm):
         if commit:
             comment.save()
         return comment
+
+class CustomUserRegistrationForm(UserCreationForm):
+    password1 = forms.CharField(widget=forms.PasswordInput, required=True)
+    password2 = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 != password2: 
+            raise forms.ValidationError("The Password and Confirm Password do not match")
+        
+        return cleaned_data
+    
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=150)
+    password = forms.CharField(widget=forms.PasswordInput)

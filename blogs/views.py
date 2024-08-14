@@ -5,6 +5,7 @@ from .forms import *
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.contrib.auth import authenticate, login
 
 # Create your views here.
 
@@ -206,3 +207,43 @@ class IndividualComment(View):
 
         comment.delete()
         return JsonResponse({'status': 'success', 'message': 'comment deleted successfully.'})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class Register(View):
+
+    def post(self, request, *args, **kwargs):
+        try:
+             data = json.loads(request.body)
+        except:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        
+
+        form = CustomUserRegistrationForm(data)
+        if form.is_valid():
+            user = form.save()
+            return JsonResponse({"register": "true", "data": user.username})
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)  
+        
+
+@method_decorator(csrf_exempt, name='dispatch')
+class LoginUser(View):
+
+    def post(self, request, *args, **kwargs):
+        try:
+             data = json.loads(request.body)
+        except:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        
+
+        form = LoginForm(data)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
+
+            return JsonResponse({"login": "true", "data": user.username})
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)  
+        
